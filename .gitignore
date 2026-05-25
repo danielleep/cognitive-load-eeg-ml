@@ -1,4 +1,18 @@
 # data
+data/
+ds007169/
+
+# generated files
+*.csv
+
+# python
+__pycache__/
+.ipynb_checkpoints/
+.venv/
+.env
+
+# mac
+.DS_Store# data
 *.zip
 *.set
 *.fdt

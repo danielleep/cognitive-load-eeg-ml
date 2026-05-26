@@ -1,7 +1,5 @@
 # Predicting Cognitive Load from Behavioral and EEG Features
 
-# Predicting Cognitive Load from Behavioral and EEG Features
-
 ## Project goal
 This project aims to predict cognitive load from behavioral and EEG-derived features using an N-Back EEG dataset.
 

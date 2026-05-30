@@ -17,7 +17,7 @@ from sklearn.preprocessing import StandardScaler
 
 PROJECT_ROOT = Path("/Users/danielleepstein/Documents/cognitive-load-eeg-ml")
 
-IN_FILE = PROJECT_ROOT / "data" / "processed" / "eeg_features_sub01_sub05_session_norm.csv"
+IN_FILE = PROJECT_ROOT / "data" / "processed" / "eeg_features_session_norm.csv"
 OUT_FILE = PROJECT_ROOT / "data" / "processed" / "eeg_baseline_session_norm_loso_results.csv"
 
 df = pd.read_csv(IN_FILE)

@@ -10,9 +10,9 @@ from scipy.signal import welch
 PROJECT_ROOT = Path("/Users/danielleepstein/Documents/cognitive-load-eeg-ml")
 
 RAW_DIR = PROJECT_ROOT / "data" / "raw"
-OUT_FILE = PROJECT_ROOT / "data" / "processed" / "eeg_features_sub01_sub05.csv"
+OUT_FILE = PROJECT_ROOT / "data" / "processed" / "eeg_features.csv"
 
-SUBJECTS_TO_USE = {f"sub-{i:02d}" for i in range(1, 6)}
+SUBJECTS_TO_USE = {f"sub-{i:02d}" for i in range(1, 11)}
 CONDITIONS_TO_USE = {"zeroBACK", "twoBACK"}
 
 CONDITION_INFO = {

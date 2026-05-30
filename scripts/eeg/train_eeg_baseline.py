@@ -17,7 +17,7 @@ from sklearn.preprocessing import StandardScaler
 
 PROJECT_ROOT = Path("/Users/danielleepstein/Documents/cognitive-load-eeg-ml")
 
-IN_FILE = PROJECT_ROOT / "data" / "processed" / "eeg_features_sub01_sub05_log.csv"
+IN_FILE = PROJECT_ROOT / "data" / "processed" / "eeg_features_engineered.csv"
 OUT_FILE = PROJECT_ROOT / "data" / "processed" / "eeg_baseline_loso_results.csv"
 
 df = pd.read_csv(IN_FILE)
@@ -32,9 +32,13 @@ print(df["target_label"].value_counts())
 
 feature_cols = [
     col for col in df.columns
-    if col.startswith("log_theta_")
-    or col.startswith("log_alpha_")
-    or col.startswith("log_beta_")
+    if (
+        col.startswith("log_theta_")
+        or col.startswith("log_alpha_")
+        or col.startswith("log_beta_")
+    )
+    and "ratio" not in col
+    and "global" not in col
 ]
 
 print("\nFeature columns:")

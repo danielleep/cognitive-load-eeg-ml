@@ -1,173 +1,118 @@
+````markdown
 # Predicting Cognitive Load from Behavioral and EEG Features
 
-## Project goal
+## Project Goal
+
 This project aims to predict cognitive load from behavioral and EEG-derived features using an N-Back EEG dataset.
 
-The main research question is:
+Main question:
 
-> Can cognitive load be predicted from behavioral and EEG-derived features, and does combining both modalities improve prediction compared to using each modality alone?
+> Can cognitive load be predicted from behavioral and EEG features, and does EEG add useful information beyond behavioral performance?
 
 ## Dataset
-Selected dataset: **COG-BCI**
 
-Task used in this project: **N-Back**
+Dataset: **COG-BCI**  
+Task: **N-Back**
 
-Initial target definition:
+Binary target definition:
+
 - **Low cognitive load:** 0-back
 - **High cognitive load:** 2-back
 - **1-back:** reserved for optional later analysis
 
-A previous candidate dataset, OpenNeuro `ds007169`, was evaluated but not selected because reaction time was not clearly available.
+A previous candidate dataset, OpenNeuro `ds007169`, was evaluated but not used because reaction time was not clearly available.
 
-## Dataset feasibility check
-Initial checks confirmed that COG-BCI is suitable for this project:
+## Data Used
 
-- Behavioral `.mat` files exist for 0-back, 1-back, and 2-back.
-- Behavioral tables include reaction time (`rt`) and correctness (`correct`).
-- EEG files exist in EEGLAB format: `.set` + `.fdt`.
-- MNE successfully reads the EEG files.
-- Example EEG file checked: `zeroBACK.set`
-- Sampling rate: 500 Hz
-- Channels: 62 EEG + 1 ECG
+Current experiments use:
 
-## Current progress
-
-### Behavioral data processing
-Behavioral files were converted from MATLAB `.mat` format to CSV for:
-
-- Subjects: `sub-01` to `sub-05`
+- Subjects: `sub-01` to `sub-10`
 - Sessions: `ses-S1`, `ses-S2`, `ses-S3`
-- Conditions: 0-back, 1-back, 2-back
+- Conditions: 0-back and 2-back
 
-A combined behavioral table was created with:
+EEG files are in EEGLAB format (`.set` + `.fdt`) and are read using MNE.
 
-- 5 subjects
-- 3 sessions
-- 3 N-Back conditions
-- 6480 total trials
+## Pipeline
 
-For the initial binary classification task, the data was filtered to:
+### Behavioral Features
 
-- 0-back and 2-back only
-- outlier trials removed
-- hit trials used for the first behavioral baseline
+Behavioral `.mat` files are converted to CSV and processed into trial-level features.
 
-### Behavioral features
-The first behavioral feature table includes:
+Main behavioral features include:
 
 - reaction time
 - correctness
 - response/miss indicators
-- previous trial features
+- previous-trial features
 - rolling reaction time
 - rolling accuracy
-- subject-normalized RT features
+- subject-normalized reaction time features
 
-Subject-wise RT normalization was added after exploratory analysis showed strong between-subject variability, especially for `sub-05`.
+### EEG Features
 
-## Behavioral baseline results
+EEG recordings are split into fixed-length time windows.
 
-Evaluation method: **Leave-One-Subject-Out cross-validation**
+For each window, band-power features are extracted:
 
-This avoids trial-level leakage by ensuring that the test subject is not included in the training set.
+- theta: 4–8 Hz
+- alpha: 8–13 Hz
+- beta: 13–30 Hz
 
-### Raw RT features
-Initial behavioral baseline using raw RT features:
+Features are averaged across broad scalp regions:
 
-| Model | Balanced Accuracy |
-|---|---:|
-| Logistic Regression | ~0.79 |
-| Random Forest | ~0.78 |
+- frontal
+- central
+- parietal
+- occipital
 
-### Subject-normalized RT features
-After adding subject-normalized RT features:
+Additional EEG features include global band power, band-power ratios, and session-normalized EEG features.
 
-| Model | Balanced Accuracy |
-|---|---:|
-| Logistic Regression | ~0.92 |
-| Random Forest | ~0.91 |
+## Evaluation
 
-This suggests that normalizing reaction time relative to each subject helps address between-subject differences in response speed.
+Models are evaluated using **Leave-One-Subject-Out cross-validation**.
 
-## Next step
-Begin EEG feature extraction for the N-Back task, starting with:
+This ensures that the test subject is not included in training and helps reduce subject-level leakage.
 
-- 0-back EEG files
-- 2-back EEG files
+## Current Results
 
-Initial EEG features will likely include band-power features such as theta, alpha, and beta power.## Project goal
-This project aims to predict cognitive load from behavioral and EEG-derived features using an N-Back EEG dataset.
+### Behavioral-only baseline
 
-## Current dataset decision
-Selected dataset: COG-BCI  
-Task: N-Back  
-Initial target definition:
-- Low cognitive load: 0-back
-- High cognitive load: 2-back
-- 1-back will be reserved for optional later analysis
+| Feature set | Best model | Balanced Accuracy |
+|---|---:|---:|
+| Subject-normalized behavioral features | Random Forest | ~0.91 |
+| Subject-normalized behavioral features | Logistic Regression | ~0.90 |
 
-## Dataset feasibility check
-Completed initial checks on sub-01, session S1:
-- Behavioral files exist for 0-back, 1-back, 2-back
-- Behavioral tables include RT and correctness
-- EEG files exist in EEGLAB format: .set + .fdt
-- MNE successfully reads zeroBACK.set
-- Sampling rate: 500 Hz
-- Channels: 62 EEG + 1 ECG
+### EEG-only baseline
 
-## Notes
-The previous dataset ds007169 was not selected because reaction time was not clearly available.
+| Feature set | Best model | Balanced Accuracy |
+|---|---:|---:|
+| Log band-power features | Logistic Regression | ~0.55 |
+| Engineered EEG features | Logistic Regression | ~0.55 |
+| Session-normalized EEG features | Random Forest | ~0.59 |
 
-## Current progress
+## Current Interpretation
 
-### Dataset selection
-Selected dataset: COG-BCI.
+Behavioral features provide a strong signal for distinguishing low vs high cognitive load.
 
-The previous candidate dataset, OpenNeuro ds007169, was evaluated but not selected because reaction time was not clearly available.
+EEG-only features are weaker, but session-level normalization improves performance slightly, suggesting that EEG features are sensitive to subject/session variability.
 
-### Current task
-N-Back task from COG-BCI.
+The normalized models should be interpreted as **calibration-aware** models, since they assume access to some subject/session data for normalization.
 
-Initial binary classification setup:
-- Low cognitive load: 0-back
-- High cognitive load: 2-back
-- 1-back is reserved for optional later analysis
+## Repository Structure
 
-### Behavioral data status
-Behavioral `.mat` files were converted to CSV for subjects sub-01 to sub-05, across 3 sessions and 3 N-Back conditions.
+```text
+scripts/
+├── behavioral/     # Behavioral preprocessing, feature creation, and baselines
+├── eeg/            # EEG feature extraction, feature engineering, and baselines
+└── exploration/    # Notes about exploratory checks
 
-A combined behavioral table was created:
-- 5 subjects
-- 3 sessions
-- 3 conditions
-- 6480 total trials
+notes/              # Experiment notes and project documentation
+data/               # Raw and processed data, not tracked by Git
+````
 
-A clean binary behavioral table was created using:
-- 0-back and 2-back only
-- outlier trials removed
+## Next Step
 
-A behavioral hit-trial feature table was created with:
-- reaction time
-- correctness
-- response/miss indicators
-- previous trial features
-- rolling RT and rolling accuracy features
+Build a first combined behavioral + EEG model and test whether EEG features add information beyond behavioral features.
 
-### Behavioral baseline results
-
-Leave-One-Subject-Out evaluation was used to avoid trial-level leakage across subjects.
-
-Initial behavioral baseline with raw RT features:
-- Logistic Regression balanced accuracy: approximately 0.79
-- Random Forest balanced accuracy: approximately 0.78
-
-EDA showed strong between-subject variability, especially for sub-05, whose low-load RTs were slower than other subjects.
-
-After adding subject-normalized RT features:
-- Logistic Regression balanced accuracy: approximately 0.92
-- Random Forest balanced accuracy: approximately 0.91
-
-This suggests that subject-wise RT normalization helps address between-subject differences in behavioral response speed.
-
-### Next step
-Begin EEG feature extraction for the N-Back task, starting with 0-back and 2-back EEG files.
+```
+```

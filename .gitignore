@@ -10,6 +10,7 @@ __pycache__/
 .ipynb_checkpoints/
 .venv/
 .env
+scripts/exploration_archive/
 
 # mac
 .DS_Store# data

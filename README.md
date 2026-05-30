@@ -1,4 +1,3 @@
-````markdown
 # Predicting Cognitive Load from Behavioral and EEG Features
 
 ## Project Goal
@@ -114,5 +113,4 @@ data/               # Raw and processed data, not tracked by Git
 
 Build a first combined behavioral + EEG model and test whether EEG features add information beyond behavioral features.
 
-```
 ```
